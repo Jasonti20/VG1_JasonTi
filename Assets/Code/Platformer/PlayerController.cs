@@ -10,6 +10,8 @@ namespace Platformer
         Rigidbody2D _rigidbody2D;
         public Transform aimPivot;
         public GameObject projectilePrefab;
+        SpriteRenderer sprite;
+        Animator animator;
 
         // State Tracking
         public int jumpsLeft;
@@ -18,6 +20,18 @@ namespace Platformer
         void Start()
         {
             _rigidbody2D = GetComponent<Rigidbody2D>();
+            sprite = GetComponent<SpriteRenderer>();
+            animator = GetComponent<Animator>();
+        }
+
+        void FixedUpdate(){
+            //This update Event is sync'd with the Physical Engine
+            animator.SetFloat("Speed", _rigidbody2D.velocity.magnitude);
+            if(_rigidbody2D.velocity.magnitude > 0) {
+                animator.speed = _rigidbody2D.velocity.magnitude / 3f;
+            } else {
+                animator.speed = 1f;
+            }
         }
 
         void Update()
@@ -26,12 +40,14 @@ namespace Platformer
             if (Input.GetKey(KeyCode.A))
             {
                 _rigidbody2D.AddForce(Vector2.left * 24f * Time.deltaTime, ForceMode2D.Impulse);
+                sprite.flipX = true;
             }
 
             // Move Player Right
             if (Input.GetKey(KeyCode.D))
             {
                 _rigidbody2D.AddForce(Vector2.right * 24f * Time.deltaTime, ForceMode2D.Impulse);
+                sprite.flipX = false;
             }
 
             // Aim Toward Mouse
@@ -61,7 +77,9 @@ namespace Platformer
                     _rigidbody2D.AddForce(Vector2.up * 15f, ForceMode2D.Impulse);
                 }
             }
+            animator.SetInteger("JumpsLeft", jumpsLeft);
         }
+
 
         void OnCollisionStay2D(Collision2D other)
         {
@@ -69,7 +87,7 @@ namespace Platformer
             if (other.gameObject.layer == LayerMask.NameToLayer("Ground"))
             {
                 // Check what is directly below our character's feet
-                RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, Vector2.down, 0.7f);
+                RaycastHit2D[] hits = Physics2D.RaycastAll(transform.position, Vector2.down, 0.85f);
                 // Debug.DrawRay(transform.position, Vector2.down * 0.7f); // Visualize Raycast
 
                 // We might have multiple things below our character's feet
