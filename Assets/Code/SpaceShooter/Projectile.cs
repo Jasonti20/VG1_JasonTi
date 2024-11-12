@@ -27,6 +27,8 @@ namespace SpaceShooter
 
         void Update()
         {
+            float acceleration = GameController.instance.missileSpeed / 2f;
+            float maxSpeed = GameController.instance.missileSpeed;
             // If a target has been chosen, adjust rotation towards it
             if (target != null)
             {
@@ -89,6 +91,8 @@ namespace SpaceShooter
 
                 // Destroy the explosion effect after a short delay
                 Destroy(explosion, 0.25f);
+
+                GameController.instance.EarnPoints(10);
             }
         }
     }
