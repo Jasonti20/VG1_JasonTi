@@ -1,41 +1,63 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 namespace Platformer
 {
     public class PlayerController : MonoBehaviour
     {
+        public static PlayerController instance;
         // Outlet
         Rigidbody2D _rigidbody2D;
         public Transform aimPivot;
         public GameObject projectilePrefab;
         SpriteRenderer sprite;
         Animator animator;
+        public TMP_Text scoreUI;
 
         // State Tracking
         public int jumpsLeft;
+        public int score;
+        public bool isPaused;
 
         // Methods
+        void Awake()
+        {
+            instance = this;
+        }
         void Start()
         {
             _rigidbody2D = GetComponent<Rigidbody2D>();
             sprite = GetComponent<SpriteRenderer>();
             animator = GetComponent<Animator>();
+            score = PlayerPrefs.GetInt("Score");
         }
 
-        void FixedUpdate(){
+        void FixedUpdate()
+        {
             //This update Event is sync'd with the Physical Engine
             animator.SetFloat("Speed", _rigidbody2D.velocity.magnitude);
-            if(_rigidbody2D.velocity.magnitude > 0) {
+            if (_rigidbody2D.velocity.magnitude > 0)
+            {
                 animator.speed = _rigidbody2D.velocity.magnitude / 3f;
-            } else {
+            }
+            else
+            {
                 animator.speed = 1f;
             }
         }
 
         void Update()
         {
+            // Update UI
+            scoreUI.text = score.ToString();
+
+            if (isPaused)
+            {
+                return;
+            }
+            
             // Move Player Left
             if (Input.GetKey(KeyCode.A))
             {
@@ -78,6 +100,13 @@ namespace Platformer
                 }
             }
             animator.SetInteger("JumpsLeft", jumpsLeft);
+
+            // (We are in the Update function of Platformer/PlayerController.cs in this screenshot)
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                MenuController.instance.Show();
+            }
+
         }
 
 
@@ -104,5 +133,12 @@ namespace Platformer
                 }
             }
         }
+        public void ResetScore()
+        {
+            score = 0;
+            PlayerPrefs.DeleteKey("Score");
+        }
+
+
     }
 }
